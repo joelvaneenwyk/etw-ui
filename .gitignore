@@ -81,3 +81,6 @@ ipch/
 # format (NuGet v4 and .NET Core).
 project.lock.json
 project.assets.json
+
+# @joelvaneenwyk
+.vscode/c_cpp_properties.json
