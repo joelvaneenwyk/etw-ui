@@ -21,20 +21,25 @@ jobs:
       matrix:
         os: ["windows-latest"]
         config: ["Debug", "Release"]
-        platform: ["ARM64", "Win32", "x64"]
-        solution: ["UIforETW/UIforETW.sln"]
-        include:
-          - platform: "AnyCPU"
-            solution: "TraceProcessors/TraceProcessors.sln"
-            config: "Debug"
-          - platform: "AnyCPU"
-            solution: "TraceProcessors/TraceProcessors.sln"
-            config: "Release"
+        platform: ["ARM64", "Win32", "x64", "x86", "Any CPU"]
+        solution: ["UIforETW", "TraceProcessors"]
+        exclude:
+          - platform: "Any CPU"
+            solution: "UIforETW"
+          - platform: "x86"
+            solution: "UIforETW"
+          - platform: "ARM64"
+            solution: "TraceProcessors"
+          - platform: "Win32"
+            solution: "TraceProcessors"
 
     runs-on: windows-latest
 
     # ⚙️ Build • Win32 • Debug
     name: "⚙️ Build • ${{ matrix.platform }} • ${{ matrix.config }} ⚙️"
+
+    env:
+      SOLUTION_PATH: "${{ matrix.solution }}/${{ matrix.solution }}.sln"
 
     steps:
       - uses: actions/checkout@v4
@@ -47,8 +52,8 @@ jobs:
 
       - name: NuGet Restore 📩
         working-directory: ${{ github.workspace }}
-        run: nuget restore "${{ matrix.solution }}"
+        run: nuget restore "${{ env.SOLUTION_PATH }}"
 
       - name: Build ⚙️
         working-directory: ${{ github.workspace }}
-        run: msbuild /m /p:Platform="${{ matrix.platform }}" /p:Configuration="${{ matrix.config }}" "${{ matrix.solution }}"
+        run: msbuild /m /p:Platform="${{ matrix.platform }}" /p:Configuration="${{ matrix.config }}" "${{ env.SOLUTION_PATH }}"
