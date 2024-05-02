@@ -35,8 +35,8 @@ jobs:
 
     runs-on: windows-latest
 
-    # Build ⚙️ Debug
-    name: "Build | ${{ matrix.config }} ⚙️"
+    # ⚙️ Build • Win32 • Debug
+    name: "⚙️ Build • ${{ matrix.platform }} • ${{ matrix.config }} ⚙️"
 
     steps:
       - uses: actions/checkout@v4
