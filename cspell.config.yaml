@@ -2,7 +2,7 @@ version: "0.2"
 ignorePaths: []
 dictionaryDefinitions:
   - name: ui-for-etw
-    path: ./.vscode/ui-for-etw.txt
+    path: ./.vscode/cspell-ui-for-etw.txt
     addWords: true
 dictionaries:
   - ui-for-etw

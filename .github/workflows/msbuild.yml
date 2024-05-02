@@ -1,0 +1,59 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["windows-latest"]
+        solution: ["UIforETW", "TraceProcessors"]
+        platform: ["ARM64", "Win32", "x64", "x86", "Any CPU"]
+        config: ["Debug", "Release"]
+        exclude:
+          - platform: "Any CPU"
+            solution: "UIforETW"
+          - platform: "x86"
+            solution: "UIforETW"
+          - platform: "ARM64"
+            solution: "TraceProcessors"
+          - platform: "Win32"
+            solution: "TraceProcessors"
+
+    runs-on: windows-latest
+
+    # ⚙️ UIforETW • Win32 • Debug
+    name: "⚙️ ${{ matrix.solution }} • ${{ matrix.platform }} • ${{ matrix.config }} ⚙️"
+
+    env:
+      SOLUTION_PATH: "${{ matrix.solution }}/${{ matrix.solution }}.sln"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup MSBuild 🛠️
+        uses: microsoft/setup-msbuild@v2
+
+      - name: NuGet Restore 📩
+        working-directory: ${{ github.workspace }}
+        run: nuget restore "${{ env.SOLUTION_PATH }}"
+
+      - name: Build ⚙️
+        working-directory: ${{ github.workspace }}
+        run: msbuild /m /p:Platform="${{ matrix.platform }}" /p:Configuration="${{ matrix.config }}" "${{ env.SOLUTION_PATH }}"
