@@ -20,9 +20,9 @@ jobs:
       fail-fast: false
       matrix:
         os: ["windows-latest"]
-        config: ["Debug", "Release"]
-        platform: ["ARM64", "Win32", "x64", "x86", "Any CPU"]
         solution: ["UIforETW", "TraceProcessors"]
+        platform: ["ARM64", "Win32", "x64", "x86", "Any CPU"]
+        config: ["Debug", "Release"]
         exclude:
           - platform: "Any CPU"
             solution: "UIforETW"
@@ -36,7 +36,7 @@ jobs:
     runs-on: windows-latest
 
     # ⚙️ Build • Win32 • Debug
-    name: "⚙️ Build • ${{ matrix.platform }} • ${{ matrix.config }} ⚙️"
+    name: "⚙️ Build ${{ matrix.solution }} • ${{ matrix.platform }} • ${{ matrix.config }} ⚙️"
 
     env:
       SOLUTION_PATH: "${{ matrix.solution }}/${{ matrix.solution }}.sln"
