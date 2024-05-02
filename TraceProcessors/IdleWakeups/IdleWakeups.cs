@@ -44,9 +44,9 @@ namespace IdleWakeups
         }
 
         public Dictionary<string, StackDetails> idleWakeupsByStackId_;
-        public Dictionary<Int32, long> previousCStates_ = null;
-        public long chromeSwitches_ = 0;
-        public long chromeIdleSwitches_ = 0;
+        public Dictionary<int, long>? previousCStates_;
+        public long chromeSwitches_;
+        public long chromeIdleSwitches_;
     }
 
     class IdleWakeupsAnalysis
@@ -120,10 +120,12 @@ namespace IdleWakeups
                 }
             }
 
-            var result = new SnapshotSummary(idleWakeupsStack);
-            result.previousCStates_ = previousCStates;
-            result.chromeIdleSwitches_ = chromeIdleSwitches;
-            result.chromeSwitches_ = chromeSwitches;
+            var result = new SnapshotSummary(idleWakeupsStack)
+            {
+                previousCStates_ = previousCStates,
+                chromeIdleSwitches_ = chromeIdleSwitches,
+                chromeSwitches_ = chromeSwitches
+            };
 
             return result;
         }
@@ -156,74 +158,73 @@ namespace IdleWakeups
                 Console.Error.WriteLine("File '{0}' does not exist.", traceName);
                 return;
             }
-            using (ITraceProcessor trace = TraceProcessor.Create(traceName))
+
+            using ITraceProcessor trace = TraceProcessor.Create(traceName);
+            Console.WriteLine("Processing trace '{0}'", Path.GetFileName(traceName));
+
+            // Scan all context switches and store callstacks where Chrome causes an idle
+            // wakeup. Also store the frequency of each unique callstack.
+            var iwakeups = GetIdleWakeupsSummary(trace);
+
+            // Print out a summary of all callstacks that causes idle wakeups.
+            // Example (can be later be used as input to separate Go-script which converts the
+            // list into something that can be read by pprof):
+            //
+            // iwakeup:
+            //         ntoskrnl.exe!SwapContext
+            //         ntoskrnl.exe!KiSwapContext
+            //         ...
+            //         ntdll.dll!RtlUserThreadStart
+            //         1070
+            // iwakeup:
+            //         ntoskrnl.exe!SwapContext
+            //         ntoskrnl.exe!KiSwapContext
+            //         ..
+            //         ntdll.dll!RtlUserThreadStart
+            //         1011
+            const int maxPrinted = 40;
+            var sortedStackEntries =
+                new List<KeyValuePair<string, StackDetails>>(iwakeups.idleWakeupsByStackId_);
+            sortedStackEntries.Sort((x, y) => y.Value.Count.CompareTo(x.Value.Count));
+            foreach (KeyValuePair<string, StackDetails> kvp in sortedStackEntries.Take(maxPrinted))
             {
-                Console.WriteLine("Processing trace '{0}'", Path.GetFileName(traceName));
-
-                // Scan all context switches and store callstacks where Chrome causes an idle
-                // wakeup. Also store the frequency of each unique callstack.
-                var iwakeups = GetIdleWakeupsSummary(trace);
-
-                // Print out a summary of all callstacks that causes idle wakeups.
-                // Example (can be later be used as input to separate Go-script which converts the
-                // list into something that can be read by pprof):
-                //
-                // iwakeup:
-                //         ntoskrnl.exe!SwapContext
-                //         ntoskrnl.exe!KiSwapContext
-                //         ...
-                //         ntdll.dll!RtlUserThreadStart
-                //         1070
-                // iwakeup:
-                //         ntoskrnl.exe!SwapContext
-                //         ntoskrnl.exe!KiSwapContext
-                //         ..
-                //         ntdll.dll!RtlUserThreadStart
-                //         1011
-                const int maxPrinted = 40;
-                var sortedStackEntries =
-                    new List<KeyValuePair<string, StackDetails>>(iwakeups.idleWakeupsByStackId_);
-                sortedStackEntries.Sort((x, y) => y.Value.Count.CompareTo(x.Value.Count));
-                foreach (KeyValuePair<string, StackDetails> kvp in sortedStackEntries.Take(maxPrinted))
+                Console.WriteLine("iwakeup:");
+                foreach (var entry in kvp.Value.Stack)
                 {
-                    Console.WriteLine("iwakeup:");
-                    foreach (var entry in kvp.Value.Stack)
+                    try
                     {
-                        try
-                        {
-                            var stackFrame = entry.GetAnalyzerString();
-                            Console.WriteLine("        {0}", stackFrame);
-                        }
-                        catch (Exception ex)
-                        {
-                            // Console.WriteLine(ex.ToString());
-                        }
+                        var stackFrame = entry.GetAnalyzerString();
+                        Console.WriteLine("        {0}", stackFrame);
                     }
-                    Console.WriteLine("        {0}", kvp.Value.Count);
+                    catch (Exception ex)
+                    {
+                        // Console.WriteLine(ex.ToString());
+                    }
                 }
+                Console.WriteLine("        {0}", kvp.Value.Count);
+            }
 
-                // Only append a summary if it was explicitly specified using the '-s' argument.
-                if (!showSummary)
-                {
-                    return;
-                }
+            // Only append a summary if it was explicitly specified using the '-s' argument.
+            if (!showSummary)
+            {
+                return;
+            }
 
-                // Append a short summary of the relationship between the total amount of detected
-                // context switches caused by Chrome and those that caused an idle wakeup.
-                Console.WriteLine("{0} idlewakeups out of {1} context switches ({2:P}).",
-                    iwakeups.chromeIdleSwitches_, iwakeups.chromeSwitches_,
-                    iwakeups.chromeIdleSwitches_ / (double)iwakeups.chromeSwitches_);
+            // Append a short summary of the relationship between the total amount of detected
+            // context switches caused by Chrome and those that caused an idle wakeup.
+            Console.WriteLine("{0} idlewakeups out of {1} context switches ({2:P}).",
+                iwakeups.chromeIdleSwitches_, iwakeups.chromeSwitches_,
+                iwakeups.chromeIdleSwitches_ / (double)iwakeups.chromeSwitches_);
 
-                // Append summary of C-state residencies (@ Idle -> chrome.exe).
-                var list = iwakeups.previousCStates_.Keys.ToList();
-                list.Sort();
-                Console.WriteLine("Previous C-State (Idle -> chrome.exe):");
-                foreach (var key in list)
-                {
-                    Console.WriteLine("  C{0}: {1,7} ({2,6:P})",
-                        key, iwakeups.previousCStates_[key],
-                        iwakeups.previousCStates_[key] / (double)iwakeups.chromeIdleSwitches_);
-                }
+            // Append summary of C-state residencies (@ Idle -> chrome.exe).
+            var list = iwakeups.previousCStates_.Keys.ToList();
+            list.Sort();
+            Console.WriteLine("Previous C-State (Idle -> chrome.exe):");
+            foreach (var key in list)
+            {
+                Console.WriteLine("  C{0}: {1,7} ({2,6:P})",
+                    key, iwakeups.previousCStates_[key],
+                    iwakeups.previousCStates_[key] / (double)iwakeups.chromeIdleSwitches_);
             }
         }
     }

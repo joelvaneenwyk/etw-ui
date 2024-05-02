@@ -42,7 +42,7 @@ namespace HeapSnapshotCompare
     {
         public DataSize Size;
         public long Count;
-        public IReadOnlyList<IStackFrame> Stack;
+        public IThreadStack Stack;
     }
 
     // A summary of a heap snapshot. This includes AllocDetails by Stack Ref #,
@@ -93,11 +93,12 @@ namespace HeapSnapshotCompare
             var allocsByStackId = new Dictionary<ulong, AllocDetails>();
             foreach (IHeapAllocation row in snapshotData.Snapshots[0].Allocations)
             {
-                allocsByStackId.TryGetValue(row.SnapshotUniqueStackId, out AllocDetails value);
+                ulong stackId = (ulong)row.SnapshotUniqueStackId;
+                allocsByStackId.TryGetValue(stackId, out AllocDetails value);
                 value.Stack = row.Stack;
                 value.Size += row.Size;
                 value.Count += 1;
-                allocsByStackId[row.SnapshotUniqueStackId] = value;
+                allocsByStackId[stackId] = value;
             }
 
             // Count how many allocations each stack frame is part of.
@@ -106,7 +107,7 @@ namespace HeapSnapshotCompare
             var hotStackFrames = new Dictionary<string, long>();
             foreach (var data in allocsByStackId.Values)
             {
-                foreach (var entry in data.Stack)
+                foreach (var entry in data.Stack.Frames)
                 {
                     var analyzerString = entry.GetAnalyzerString();
                     hotStackFrames.TryGetValue(analyzerString, out long count);
