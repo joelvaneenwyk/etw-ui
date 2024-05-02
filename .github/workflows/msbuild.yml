@@ -35,8 +35,8 @@ jobs:
 
     runs-on: windows-latest
 
-    # ⚙️ Build • Win32 • Debug
-    name: "⚙️ Build ${{ matrix.solution }} • ${{ matrix.platform }} • ${{ matrix.config }} ⚙️"
+    # ⚙️ UIforETW • Win32 • Debug
+    name: "⚙️ ${{ matrix.solution }} • ${{ matrix.platform }} • ${{ matrix.config }} ⚙️"
 
     env:
       SOLUTION_PATH: "${{ matrix.solution }}/${{ matrix.solution }}.sln"
