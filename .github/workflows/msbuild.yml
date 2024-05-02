@@ -11,15 +11,6 @@ on:
   pull_request:
     branches: [main, develop]
 
-env:
-  # Path to the solution file relative to the root of the project.
-  SOLUTION_FILE_PATH: UIforETW/UIforETW.sln
-
-  # Configuration type to build.
-  # You can convert this to a build matrix if you need coverage of multiple configuration types.
-  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-  BUILD_CONFIGURATION: Release
-
 permissions:
   contents: read
 
@@ -32,6 +23,13 @@ jobs:
         config: ["Debug", "Release"]
         platform: ["ARM64", "Win32", "x64"]
         solution: ["UIforETW/UIforETW.sln"]
+        include:
+          - platform: "AnyCPU"
+            solution: "TraceProcessors/TraceProcessors.sln"
+            config: "Debug"
+          - platform: "AnyCPU"
+            solution: "TraceProcessors/TraceProcessors.sln"
+            config: "Release"
 
     runs-on: windows-latest
 
