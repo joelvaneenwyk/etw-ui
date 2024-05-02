@@ -51,5 +51,5 @@ jobs:
         run: nuget restore
 
       - name: Build ⚙️
-        working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: msbuild /m /p:Configuration="${{ matrix.config }}" ${{env.SOLUTION_FILE_PATH}}
+        working-directory: ${{ github.workspace }}
+        run: msbuild /m /p:Configuration="${{ matrix.config }}" "${{ matrix.solution }}"
