@@ -1,5 +1,6 @@
 # Custom Dictionary Words
 bindir
+codeql
 copyfailure
 dbghelp
 destdir
