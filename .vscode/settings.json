@@ -1,4 +1,7 @@
 {
+  "files.associations": {
+    "*.asm": "asm-intel-x86-generic"
+  },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.compilerArgs": [],
   "C_Cpp_Runner.cppCompilerPath": "g++",
