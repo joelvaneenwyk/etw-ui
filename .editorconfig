@@ -12,9 +12,11 @@ insert_final_newline = true
 [*.{yml,yaml}]
 indent_size = 2
 
-
 [*.{bat,cmd}]
 indent_size = 4
 indent_style = space
 line_ending = crlf
 encoding = utf-8
+
+[*.{py,pyw}]
+indent_size = 2
