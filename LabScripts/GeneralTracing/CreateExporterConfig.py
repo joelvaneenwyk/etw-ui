@@ -50,10 +50,10 @@ def main():
   #                   Mark,    5418754, Stopping
 
   assert(len(lines) == 3)
-  parts0 = map(lambda a : a.strip(), lines[1].split(','))
+  parts0 = [a.strip() for a in lines[1].split(",")]
   assert(parts0[2] == 'LabScriptsStarting')
   assert(parts0[0] == 'Mark')
-  parts1 = map(lambda a : a.strip(), lines[2].split(','))
+  parts1 = [a.strip() for a in lines[2].split(",")]
   assert(parts1[2] == 'LabScriptsStopping')
   assert(parts1[0] == 'Mark')
 
@@ -92,15 +92,15 @@ def main():
   }
   """
 
-  print config_start % etl_name.replace("\\", "\\\\"),
+  print(config_start % etl_name.replace("\\", "\\\\"), end=" ")
 
   profiles = glob.glob(os.path.join(script_dir, "*.wpaprofile"))
   for index, profile in enumerate(profiles):
-    print profile_base % (profile.replace("\\", "\\\\"), start_time, stop_time),
+    print(profile_base % (profile.replace("\\", "\\\\"), start_time, stop_time), end=" ")
     if index != len(profiles)-1:
-      print ",",
+      print(",", end=" ")
 
-  print config_end,
+  print(config_end, end=" ")
 
 
 if __name__ == '__main__':
