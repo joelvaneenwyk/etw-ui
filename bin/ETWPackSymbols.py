@@ -1,26 +1,29 @@
-# Copyright 2015 Google Inc. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-from __future__ import print_function
-
 """
-This script copies all of the .symcache files referenced by the specified
+Copyright 2015 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+----------------------------------------------------------------------------------
+
+This script copies all of the `.symcache` files referenced by the specified
 ETW trace to a specified directory so that they can easily be shared with
 other people. The package export option in WPA (File-> Export Package) makes
-this functionality mostly obsolete (Export Package puts the .symcache files in
-a .wpapk file along with the trace and the current profile) but this script is
+this functionality mostly obsolete (Export Package puts the `.symcache` files in
+a `.wpapk` file along with the trace and the current profile) but this script is
 retained because it does give additional flexibility and serves as an example.
 """
+from __future__ import print_function
+
 
 import os
 import re
@@ -104,7 +107,7 @@ def main():
   interestingModuleCount = 0
 
   symCachePathBase = os.getenv('_NT_SYMCACHE_PATH')
-  if symCachePathBase == None or len(symCachePathBase) == 0:
+  if symCachePathBase is None or len(symCachePathBase) == 0:
     # Set SymCache to the C drive if not specified.
     symCachePathBase = 'c:\\symcache\\'
     print('_NT_SYMCACHE_PATH not set. Looking for symcache in %s' % symCachePathBase)

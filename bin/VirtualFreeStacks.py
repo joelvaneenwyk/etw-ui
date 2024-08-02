@@ -67,7 +67,7 @@ def main():
   # stored.
   stack_store = None
   for line in open(sys.argv[1]):
-    if stack_store != None and line.startswith('                  Stack'):
+    if stack_store is not None and line.startswith('                  Stack'):
       stack_match = re.match(r' *Stack, *\d*, *\d*, (.*)', line)
       if stack_match:
         stack = stack_match.groups()[0]
