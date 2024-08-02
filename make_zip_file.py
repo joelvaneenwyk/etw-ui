@@ -13,7 +13,7 @@ dirToZip = sys.argv[2]
 dirToZip = dirToZip
 
 # Request compression
-zf = zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED)
+zf = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
 for dirname, subdirs, files in os.walk(dirToZip):
   zf.write(dirname)
   for filename in files:

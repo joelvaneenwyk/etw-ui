@@ -5,10 +5,10 @@ prefix = 'const float kCurrentVersion = '
 
 version_header = sys.argv[1]
 for line in open(version_header).readlines():
-	if line.startswith(prefix):
-		version = line[len(prefix) : len(prefix) + 4]
-		print('Renaming zip files to version "%s"' % version)
-		os.rename('etwpackage.zip', 'etwpackage%s.zip' % version)
-		sys.exit(0)
+  if line.startswith(prefix):
+    version = line[len(prefix) : len(prefix) + 4]
+    print('Renaming zip files to version "%s"' % version)
+    os.rename('etwpackage.zip', 'etwpackage%s.zip' % version)
+    sys.exit(0)
 
-assert(not "Didn't find header")
+assert not "Didn't find header"

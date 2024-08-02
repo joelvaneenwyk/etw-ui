@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
+"""
 This script scans a .wpaProfile file looking for presets that start with
 Randomascii. These are the custom presets shipped with UIforETW. When updating
-the startup profile it is easy for these to get deleted, so a tool for auditing 
+the startup profile it is easy for these to get deleted, so a tool for auditing
 changes is quite helpful.
-'''
+"""
 
 from __future__ import print_function
 

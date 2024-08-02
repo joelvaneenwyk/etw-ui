@@ -20,6 +20,7 @@ http://randomascii.wordpress.com/2013/11/04/exporting-arbitrary-data-from-xperf-
 
 This script relies on having XperfProcessParentage.wpaProfile in the same directory as the script.
 """
+
 from __future__ import print_function
 
 import os
@@ -52,25 +53,26 @@ def PrintProcessTree(procID, indent, is_loop):
   if the process is part of a loop (some part of the loop must have
   reused a process ID).
   """
-  missing = ""
-  detail = ""
-  loop = ""
+  missing = ''
+  detail = ''
+  loop = ''
   # Look up this process in our database. It might
   # not be there.
   if procID in details:
     detail = details[procID]
   else:
-    missing = " (missing process)"
+    missing = ' (missing process)'
   if is_loop:
-    loop = " (loop)"
+    loop = ' (loop)'
   parents[procID] = processedParent
-  print("%s%d%s%s, %s" % ("    " * indent, procID, missing, loop, detail))
+  print('%s%d%s%s, %s' % ('    ' * indent, procID, missing, loop, detail))
   # Loop through all of the processes looking for ones that have this
   # process as their parent.
   for childID in parents.keys():
     parentID = parents[childID]
     if parentID == procID:
-      PrintProcessTree(childID, indent+1, False)
+      PrintProcessTree(childID, indent + 1, False)
+
 
 def main():
   """
@@ -81,21 +83,21 @@ def main():
   # ProcessParentage.wpaProfile. Ideally this filename could be
   # specified, but oh well. Note that this name changes depending on the version
   # of wpaexporter that you use, so that's awesome.
-  csvFilename = "Processes_ProcessParentage.csv"
+  csvFilename = 'Processes_ProcessParentage.csv'
 
   if len(sys.argv) < 2:
-    print("Usage: %s trace.etl" % sys.argv[0])
-    print("This script extracts process parentage data from the specified")
-    print("ETL file and prints it in a tree format, together with process name")
-    print("and command line information.")
-    print("See this blog post for more details:")
-    print("http://randomascii.wordpress.com/2013/11/04/exporting-arbitrary-data-from-xperf-etl-files/")
+    print('Usage: %s trace.etl' % sys.argv[0])
+    print('This script extracts process parentage data from the specified')
+    print('ETL file and prints it in a tree format, together with process name')
+    print('and command line information.')
+    print('See this blog post for more details:')
+    print('http://randomascii.wordpress.com/2013/11/04/exporting-arbitrary-data-from-xperf-etl-files/')
     sys.exit(0)
 
   # Our usage of subprocess seems to require Python 2.7+
   if sys.version_info.major == 2 and sys.version_info.minor < 7:
-    print("Your python version is too old - 2.7 or higher required.")
-    print("Python version is %s" % sys.version)
+    print('Your python version is too old - 2.7 or higher required.')
+    print('Python version is %s' % sys.version)
     sys.exit(0)
 
   if not os.path.exists(sys.argv[1]):
@@ -106,25 +108,25 @@ def main():
   try:
     os.remove(csvFilename)
   except WindowsError as e:
-    if e.winerror != 2: # WindowsError: [Error 2] The system cannot find the file specified
+    if e.winerror != 2:  # WindowsError: [Error 2] The system cannot find the file specified
       raise e
 
   # Find the location of the .wpaProfile that is needed for exporting the
   # process parentage data.
   scriptdir = os.path.split(sys.argv[0])[0]
-  profilePath = os.path.join(scriptdir, "XperfProcessParentage.wpaProfile")
+  profilePath = os.path.join(scriptdir, 'XperfProcessParentage.wpaProfile')
 
   # Run wpaexporter
-  output = subprocess.check_output("wpaexporter \"%s\" -profile \"%s\"" % (sys.argv[1], profilePath))
+  output = subprocess.check_output('wpaexporter "%s" -profile "%s"' % (sys.argv[1], profilePath))
   print(output, file=sys.stderr)
 
   # Read the raw data.
   with open(csvFilename) as csvFile:
     lines = csvFile.readlines()
 
-  #lines = open(csvFilename).readlines()
+  # lines = open(csvFilename).readlines()
   if len(lines) < 2:
-    print("Missing data. Sorry.")
+    print('Missing data. Sorry.')
     sys.exit(0)
 
   # Scan through every line of the .csv file (except the first
@@ -132,17 +134,16 @@ def main():
   # parents and details dictionaries.
   for line in lines[1:]:
     # Should probably do better CSV parsing, but I don't think it matters.
-    parts = line.strip().split(",")
+    parts = line.strip().split(',')
     procID = int(parts[0])
     parentID = int(parts[1])
     # Treat the remaining fields as a single string.
-    extraData = ",".join(parts[2:])
+    extraData = ','.join(parts[2:])
     if procID in parents:
-      print("Process ID %d found again. Discarding %s\n" % (procID, extraData), file=sys.stderr)
+      print('Process ID %d found again. Discarding %s\n' % (procID, extraData), file=sys.stderr)
     else:
       parents[procID] = parentID
       details[procID] = extraData
-
 
   # Iterate through all processes. For each process try to find
   # its 'oldest' ancestor, and then print a tree starting from
@@ -174,5 +175,6 @@ def main():
         break
     PrintProcessTree(ultimateParentID, 0, bIsLoop)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
   main()

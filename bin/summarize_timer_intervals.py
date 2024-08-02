@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
+"""
 This script extracts timer frequency/interval data from an ETW trace and
 summarizes it by process in order to understand what processes are raising the
 system-global timer interrupt frequency, how frequently, and for how long. The
@@ -36,7 +36,7 @@ lowers it then the timer interval during this time period will be reported as
 One known flaw of this script is that it doesn't handle having a single process
 doing nested calls to timeBeginPeriod. It could be added but would add
 complexity.
-'''
+"""
 
 from __future__ import print_function
 
@@ -45,11 +45,10 @@ import os
 import re
 import subprocess
 import sys
-import time
 
-parser = argparse.ArgumentParser(description="Identify and categorize chrome processes in an ETW trace.")
-parser.add_argument("trace", type=str, help="ETW trace to be processed")
-parser.add_argument("-f", "--filter_process", help="Only show results for the specified processes")
+parser = argparse.ArgumentParser(description='Identify and categorize chrome processes in an ETW trace.')
+parser.add_argument('trace', type=str, help='ETW trace to be processed')
+parser.add_argument('-f', '--filter_process', help='Only show results for the specified processes')
 args = parser.parse_args()
 
 # Our usage of subprocess seems to require Python 2.7+
@@ -69,7 +68,7 @@ scriptDir = os.path.split(scriptPath)[0]
 
 profilePath = os.path.join(scriptDir, 'timer_intervals.wpaProfile')
 if not os.path.exists(profilePath):
-  print('Couldn\'t find \"%s\". This should be part of the UIforETW repo and releases' % profilePath)
+  print('Couldn\'t find "%s". This should be part of the UIforETW repo and releases' % profilePath)
   sys.exit(0)
 
 if 'ProgramFiles(x86)' in os.environ:
@@ -130,6 +129,7 @@ for line in open(csv_name).readlines()[1:]:
 
 # Get process-type information for Chrome processes.
 import IdentifyChromeProcesses
+
 types_by_pid = IdentifyChromeProcesses.GetPIDToTypeMap(trace_name)
 
 print('Trace duration is %1.3f seconds.' % final_timestamp)
@@ -168,6 +168,6 @@ for process in changes_by_process.keys():
     if type(interval) == type(0.0):
       if interval > 0:
         print('  %1.1f ms for %5.1f%% of the time' % (interval, 100 * intervals[interval] / final_timestamp), end='')
-    #else:
+    # else:
     #  print('  Unknown ms for %5.1f%% of the time' % (100 * intervals[interval] / final_timestamp), end='')
   print('    %s%s: %d frequency changes %s' % (process, type_name, len(entries) - fake_events_count, ps))

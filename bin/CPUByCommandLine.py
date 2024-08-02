@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
+"""
 This script is designed to get CPU-time by process command line. It is used
 after running:
 wpaexporter -i trace.etl -profile CPUUsageByCommandLine.wpaProfile
@@ -22,7 +22,7 @@ process to command line and another mapping from process to CPU usage.
 Due to PID reuse the results are not guaranteed but will be mostly accurate.
 This was initially written in order to analyze CPU usage by Python scripts in
 Chromium's build.
-'''
+"""
 
 from __future__ import print_function
 

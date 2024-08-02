@@ -35,12 +35,14 @@ import sys
 
 process_name_re = re.compile(r'(.*) \(\d+\)')
 
-def Summarize(filename, interesting_processes, label, units, results,
-      count_browser_processes=False):
+
+def Summarize(filename, interesting_processes, label, units, results, count_browser_processes=False):
   chrome_processes = ['chrome.exe']
-  edge_processes = ['MicrosoftEdge.exe <MicrosoftEdge>',
-                    'MicrosoftEdgeCP.exe <MicrosoftEdge>',
-                    'MicrosoftEdgeCP.exe <ContentProcess>']
+  edge_processes = [
+    'MicrosoftEdge.exe <MicrosoftEdge>',
+    'MicrosoftEdgeCP.exe <MicrosoftEdge>',
+    'MicrosoftEdgeCP.exe <ContentProcess>',
+  ]
   staging = {}
   for process_name in interesting_processes:
     staging[process_name] = 0.0
@@ -50,15 +52,13 @@ def Summarize(filename, interesting_processes, label, units, results,
   is_edge = False
   is_chrome = False
   record_other_process = True
-  interesting_processes = (
-      chrome_processes + edge_processes + interesting_processes)
+  interesting_processes = chrome_processes + edge_processes + interesting_processes
   other_process = None
 
   first_line = True
   browser_process_count = 0
   with open(filename) as file_handle:
-    for row in csv.reader(
-        file_handle, delimiter = ',', quotechar = '"', skipinitialspace=True):
+    for row in csv.reader(file_handle, delimiter=',', quotechar='"', skipinitialspace=True):
       if first_line:
         first_line = False
         continue
@@ -96,37 +96,44 @@ def Summarize(filename, interesting_processes, label, units, results,
         staging['Other'] += payload
 
   assert (not is_edge) or (not is_chrome), (
-      'Both Chrome and Edge are running, and these lab scripts are '
-      'set up to only measure one of them at a time.')
+    'Both Chrome and Edge are running, and these lab scripts are ' 'set up to only measure one of them at a time.'
+  )
 
   # Append the dictionary of results to an array of dictionaries.
   for key in staging.keys():
-    results.append({'label' : key + ' ' + label,
-                    'value' : staging[key],
-                    'units' : units})
+    results.append({'label': key + ' ' + label, 'value': staging[key], 'units': units})
   if other_process:
-    results.append({'label' : 'Biggest other ' + label,
-                    'value' : other_process})
+    results.append({'label': 'Biggest other ' + label, 'value': other_process})
   if count_browser_processes:
-    results.append({'label' : 'Browser process count',
-                    'value' : browser_process_count})
+    results.append({'label': 'Browser process count', 'value': browser_process_count})
 
 
 def main():
   data_dir = sys.argv[1]
 
   results = []
-  Summarize(os.path.join(data_dir,
-              'CPU_Usage_(Precise)_Randomascii_CPU_Summary_by_Process.csv'),
-            ['dwm.exe', 'audiodg.exe', 'System'], 'CPU usage', 'ms', results)
-  Summarize(os.path.join(data_dir,
-              'GPU_Utilization_Table_Randomascii_GPU_Summary_by_Process.csv'),
-            ['dwm.exe', 'csrss.exe'], 'GPU usage', 'ms', results)
-  Summarize(os.path.join(data_dir,
-              'Virtual_Memory_Snapshots_Randomascii_Private_Working_Set_Summary'
-              '_by_Process.csv'),
-            [], 'Private Working set', 'MiB', results,
-            count_browser_processes=True)
+  Summarize(
+    os.path.join(data_dir, 'CPU_Usage_(Precise)_Randomascii_CPU_Summary_by_Process.csv'),
+    ['dwm.exe', 'audiodg.exe', 'System'],
+    'CPU usage',
+    'ms',
+    results,
+  )
+  Summarize(
+    os.path.join(data_dir, 'GPU_Utilization_Table_Randomascii_GPU_Summary_by_Process.csv'),
+    ['dwm.exe', 'csrss.exe'],
+    'GPU usage',
+    'ms',
+    results,
+  )
+  Summarize(
+    os.path.join(data_dir, 'Virtual_Memory_Snapshots_Randomascii_Private_Working_Set_Summary' '_by_Process.csv'),
+    [],
+    'Private Working set',
+    'MiB',
+    results,
+    count_browser_processes=True,
+  )
 
   json.dump(results, open(os.path.join(data_dir, 'results.json'), 'wt'))
 

@@ -59,7 +59,7 @@ Example:
                     Pmc,    2428274,         84, 45813769, 2146039
 Error: Description for thread state (9) could not be found. Thread state array out of date!!
                 CSwitch,    2428274,           System (   4),         84,   23,   -1,         220,        0,        csrss.exe ( 628),        732,   14,   -1,  <out of range>,  WrProcessInSwap, Swapable,     19,   2,   4,   68552704,    0,    0
- 
+
 """
 
 from __future__ import print_function
@@ -93,7 +93,7 @@ lastCSwitchTimeByCPU = {}
 countersByProcess = {}
 contextSwitchesByProcess = {}
 cpuTimeByProcess = {}
-processByCPU = {} # Which process has been switched in to a particular CPU
+processByCPU = {}  # Which process has been switched in to a particular CPU
 description = None
 
 for x in range(len(l) - 1):
@@ -106,14 +106,14 @@ for x in range(len(l) - 1):
       description = l[x].strip()
       continue
     counters = list(map(int, pmc_parts[3:]))
-    assert(len(counters) == num_counters)
+    assert len(counters) == num_counters
     # Look for a CSwitch line. Ideally it will be next, but sometimes an Error: line
     # might be in-between.
     cswitch_line = ''
-    if l[x+1].startswith('                CSwitch,'):
-      cswitch_line = l[x+1]
-    elif l[x+1].startswith('Error: ') and l[x+2].startswith('                CSwitch,'):
-      cswitch_line = l[x+2]
+    if l[x + 1].startswith('                CSwitch,'):
+      cswitch_line = l[x + 1]
+    elif l[x + 1].startswith('Error: ') and l[x + 2].startswith('                CSwitch,'):
+      cswitch_line = l[x + 2]
     if cswitch_line:
       cswitch_parts = cswitch_line.split(',')
       CPU = int(cswitch_parts[16].strip())
@@ -121,15 +121,17 @@ for x in range(len(l) - 1):
       timeStamp = int(cswitch_parts[1])
       # See if we've got previous Pmc records for this CPU:
       if CPU in countersByCPU:
-        diffs = list(map(lambda a,b : a - b, counters, countersByCPU[CPU]))
+        diffs = list(map(lambda a, b: a - b, counters, countersByCPU[CPU]))
         old_process = cswitch_parts[8].strip()
         # Sanity checking...
         if old_process != processByCPU[CPU]:
           print('Old process mismatch at line %d, %s versus %s' % (x, old_process, processByCPU[CPU]))
           sys.exit(0)
         if old_process != 'Idle (   0)':
-          countersByProcess[old_process] = list(map(lambda x, y: x + y, countersByProcess.get(old_process, num_counters * [0]), diffs))
-          assert(len(countersByProcess[old_process]) == num_counters)
+          countersByProcess[old_process] = list(
+            map(lambda x, y: x + y, countersByProcess.get(old_process, num_counters * [0]), diffs)
+          )
+          assert len(countersByProcess[old_process]) == num_counters
           contextSwitchesByProcess[old_process] = contextSwitchesByProcess.get(old_process, 0) + 1
           cpuTimeByProcess[old_process] = cpuTimeByProcess.get(old_process, 0) + (timeStamp - lastCSwitchTimeByCPU[CPU])
 
@@ -163,7 +165,7 @@ print('%43s: cnt1/cnt2%s' % ('Process name', counterDescription))
 totals_to_print = {}
 for process in countersByProcess.keys():
   totals = countersByProcess[process]
-  assert(len(totals) == num_counters)
+  assert len(totals) == num_counters
   # Extract the .exe name and separate it from the PID.
   match = re.match(r'(.*).exe \(\d+\)', process)
   if match:

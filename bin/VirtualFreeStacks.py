@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
+"""
 This script summarizes VirtualFree data from an ETW trace. You need to record
 an ETW trace with the VIRT_ALLOC provider (on by default with UIforETW) and
 also have VirtualAlloc+VirtualFree specified in the set of stack walks. The
@@ -30,13 +30,14 @@ memory. It then prints out the call stacks for the process that freed the most.
 
 The text file which this file parses was created with this xperf command:
      xperf -i trace.etl -symbols -target machine -o output.csv -a dumper
-'''
+"""
 
 from __future__ import print_function
 
 import os
 import sys
 import re
+
 
 def main():
   if len(sys.argv) < 2:
@@ -60,7 +61,7 @@ def main():
   # Typical lines look like this:
   #             VirtualFree,     206764,       chrome.exe (22128), 0x00001a0c08700000, 0x00001a0c08740000,  DECOMMIT
   # The next line should look like this (the '13012' value is presumably the thread ID):
-  #                   Stack,     206764,      13012, ntoskrnl.exe!MmFreeVirtualMemory, ntoskrnl.exe!NtFreeVirtualMemory, 
+  #                   Stack,     206764,      13012, ntoskrnl.exe!MmFreeVirtualMemory, ntoskrnl.exe!NtFreeVirtualMemory,
 
   # If not-None then this records where dictionary where the stack data should be
   # stored.
@@ -103,8 +104,7 @@ def main():
 
   print()
   biggest_process = sorted[0][1]
-  print('%d stacks found in %s' % (len(total_by_stacks[biggest_process]),
-        biggest_process))
+  print('%d stacks found in %s' % (len(total_by_stacks[biggest_process]), biggest_process))
 
   # Now print all of the free stacks for the biggest process.
   sorted_stacks = []
@@ -115,8 +115,7 @@ def main():
   sorted_stacks.reverse()
 
   for record in sorted_stacks[:10]:
-    print('%1.1f MB decommitted in %d calls from stack:' %
-          (record[0][0] / 1e6, record[0][1]))
+    print('%1.1f MB decommitted in %d calls from stack:' % (record[0][0] / 1e6, record[0][1]))
     print('    %s' % record[1].replace(', ', '\n    '))
 
 

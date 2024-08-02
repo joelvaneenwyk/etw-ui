@@ -32,12 +32,13 @@ import os
 import subprocess
 import sys
 
+
 def main():
   etl_name = sys.argv[1]
 
   script_dir = os.path.dirname(sys.argv[0])
   if len(script_dir) == 0:
-    script_dir = "."
+    script_dir = '.'
 
   # Use the built-in xperf action to export the marks. This is much faster than
   # invoking wpaExporter. These marks are required.
@@ -49,13 +50,13 @@ def main():
   #                   Mark,     753176, Starting
   #                   Mark,    5418754, Stopping
 
-  assert(len(lines) == 3)
-  parts0 = [a.strip() for a in lines[1].split(",")]
-  assert(parts0[2] == 'LabScriptsStarting')
-  assert(parts0[0] == 'Mark')
-  parts1 = [a.strip() for a in lines[2].split(",")]
-  assert(parts1[2] == 'LabScriptsStopping')
-  assert(parts1[0] == 'Mark')
+  assert len(lines) == 3
+  parts0 = [a.strip() for a in lines[1].split(',')]
+  assert parts0[2] == 'LabScriptsStarting'
+  assert parts0[0] == 'Mark'
+  parts1 = [a.strip() for a in lines[2].split(',')]
+  assert parts1[2] == 'LabScriptsStopping'
+  assert parts1[0] == 'Mark'
 
   # The times are in microseconds.
   start_time = '%ss' % (int(parts0[1]) / 1e6)
@@ -92,15 +93,15 @@ def main():
   }
   """
 
-  print(config_start % etl_name.replace("\\", "\\\\"), end=" ")
+  print(config_start % etl_name.replace('\\', '\\\\'), end=' ')
 
-  profiles = glob.glob(os.path.join(script_dir, "*.wpaprofile"))
+  profiles = glob.glob(os.path.join(script_dir, '*.wpaprofile'))
   for index, profile in enumerate(profiles):
-    print(profile_base % (profile.replace("\\", "\\\\"), start_time, stop_time), end=" ")
-    if index != len(profiles)-1:
-      print(",", end=" ")
+    print(profile_base % (profile.replace('\\', '\\\\'), start_time, stop_time), end=' ')
+    if index != len(profiles) - 1:
+      print(',', end=' ')
 
-  print(config_end, end=" ")
+  print(config_end, end=' ')
 
 
 if __name__ == '__main__':

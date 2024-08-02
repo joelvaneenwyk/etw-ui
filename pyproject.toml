@@ -17,6 +17,9 @@ build-backend = "hatchling.build"
 line-length = 120
 indent-width = 2
 
+[tool.ruff.format]
+quote-style = "single"
+
 [tool.rye]
 managed = true
 dev-dependencies = [
@@ -32,3 +35,7 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/etw_ui"]
+
+[tool.pylint]
+max-line-length = 120
+indent-string = "  "

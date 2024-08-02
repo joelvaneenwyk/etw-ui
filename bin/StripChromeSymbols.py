@@ -1,4 +1,4 @@
-﻿# Copyright 2015 Google Inc. All Rights Reserved.
+# Copyright 2015 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ been eliminated, which seems like it would make this script unnecessary, but the
 symbol translation slowdowns have been replaced by a bug in downloading symbols from
 Chrome's symbol server.
 """
+
 from __future__ import print_function
 
 import os
@@ -61,6 +62,7 @@ import subprocess
 # Set to true to do symbol translation as well as downloading. Set to
 # false to just download symbols and let WPA translate them.
 strip_and_translate = True
+
 
 def main():
   if len(sys.argv) < 2:
@@ -100,8 +102,7 @@ def main():
   # be in the path, so copy them all to the script directory.
   for third_party in ['pdbcopy.exe', 'dbghelp.dll', 'symsrv.dll']:
     if not os.path.exists(third_party):
-      source = os.path.normpath(os.path.join(script_dir, r'..\third_party', \
-          third_party))
+      source = os.path.normpath(os.path.join(script_dir, r'..\third_party', third_party))
       dest = os.path.normpath(os.path.join(script_dir, third_party))
       shutil.copy2(source, dest)
 
@@ -128,18 +129,20 @@ def main():
   pdb_re = re.compile(r'"\[RSDS\] PdbSig: {(.*-.*-.*-.*-.*)}; Age: (.*); Pdb: (.*)"')
   pdb_cached_re = re.compile(r'Found .*file - placed it in (.*)')
 
-  print('Pre-translating chrome symbols from stripped PDBs to avoid 10-15 minute translation times '
-        'and to work around WPA symbol download bugs.')
+  print(
+    'Pre-translating chrome symbols from stripped PDBs to avoid 10-15 minute translation times '
+    'and to work around WPA symbol download bugs.'
+  )
 
   symcache_files = []
   # Keep track of the local symbol files so that we can temporarily rename them
   # to stop xperf from using -- rename them from .pdb to .pdbx
   local_symbol_files = []
 
-  #-tle = tolerate lost events
-  #-tti = tolerate time ivnersions
-  #-a symcache = show image and symbol identification (see xperf -help processing)
-  #-dbgid = show symbol identification information (see xperf -help symcache)
+  # -tle = tolerate lost events
+  # -tti = tolerate time ivnersions
+  # -a symcache = show image and symbol identification (see xperf -help processing)
+  # -dbgid = show symbol identification information (see xperf -help symcache)
   command = 'xperf -i "%s" -tle -tti -a symcache -dbgid' % tracename
   print('> %s' % command)
   found_uncached = False
@@ -147,10 +150,21 @@ def main():
   command_output = str(raw_command_output).splitlines()
 
   for line in command_output:
-    pe_match = None # This is the name to use when generating the .symcache files
+    pe_match = None  # This is the name to use when generating the .symcache files
     # Complete list of Chrome executables and binaries. Some are only used in internal builds.
     # Note that case matters for downloading PDBs.
-    for pe_name in ['chrome.exe.pdb', 'chrome_proxy.exe.pdb', 'chrome.dll.pdb', 'blink_web.dll.pdb', 'content.dll.pdb', 'chrome_elf.dll.pdb', 'chrome_watcher.dll.pdb', 'libEGL.dll.pdb', 'libGLESv2.dll.pdb', 'eventlog_provider.dll.pdb']:
+    for pe_name in [
+      'chrome.exe.pdb',
+      'chrome_proxy.exe.pdb',
+      'chrome.dll.pdb',
+      'blink_web.dll.pdb',
+      'content.dll.pdb',
+      'chrome_elf.dll.pdb',
+      'chrome_watcher.dll.pdb',
+      'libEGL.dll.pdb',
+      'libGLESv2.dll.pdb',
+      'eventlog_provider.dll.pdb',
+    ]:
       if line.count('Pdb: ' + pe_name) > 0:
         pe_match = pe_name
     if pe_match:
@@ -158,7 +172,7 @@ def main():
       if match:
         guid, age, path = match.groups()
         guid = guid.replace('-', '')
-        age = int(age) # Prepare for printing as hex
+        age = int(age)  # Prepare for printing as hex
         filepart = os.path.split(path)[1]
         # Starting around 2018 xperf started generating symcache file names in a
         # way that is more compatible with symbol servers. If the symbol server
@@ -174,7 +188,14 @@ def main():
           continue
         # Only print messages for chrome PDBs that aren't in the symcache
         found_uncached = True
-        print('Found uncached reference to %s: %s - %s' % (filepart, guid, age, ))
+        print(
+          'Found uncached reference to %s: %s - %s'
+          % (
+            filepart,
+            guid,
+            age,
+          )
+        )
         symcache_files.append(symcache_file)
         pdb_cache_path = None
         retrieve_command = '%s %s %s %s' % (retrieve_path, guid, age, filepart)
@@ -221,7 +242,10 @@ def main():
               if output:
                 print('  %s' % output, end='')
             if not os.path.exists(dest_path):
-              print('Aborting symbol generation because stripped PDB "%s" does not exist. WPA symbol loading may be slow.' % dest_path)
+              print(
+                'Aborting symbol generation because stripped PDB "%s" does not exist. WPA symbol loading may be slow.'
+                % dest_path
+              )
               sys.exit(0)
           else:
             print('   Symbols retrieved.')
@@ -254,14 +278,14 @@ def main():
         else:
           renames.append((local_pdb, temp_name))
 
-      #-build = build the symcache store for this trace (see xperf -help symcache)
+      # -build = build the symcache store for this trace (see xperf -help symcache)
       if rename_errors:
         print('Skipping symbol generation due to PDB rename errors. WPA symbol loading may be slow.')
       else:
         gen_command = 'xperf -i "%s" -symbols -tle -tti -a symcache -build' % tracename
         print('> %s' % gen_command)
         for line in os.popen(gen_command).readlines():
-          pass # Don't print line
+          pass  # Don't print line
     except KeyboardInterrupt:
       # Catch Ctrl+C exception so that PDBs will get renamed back.
       if renames:
@@ -293,6 +317,7 @@ def main():
       print('No PDBs copied, nothing to do.')
     else:
       print('No uncached PDBS found, nothing to do.')
+
 
 if __name__ == '__main__':
   main()
