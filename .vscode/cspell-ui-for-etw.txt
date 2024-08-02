@@ -1,12 +1,15 @@
 # Custom Dictionary Words
 ackages
 bindir
+buildbot
 buildmode
 codeql
 COMDAT
 copyfailure
 dbghelp
+dbgid
 destdir
+destdirname
 devenv
 devrel
 errorlevel
@@ -23,8 +26,10 @@ GOARCH
 GOPATH
 gsutil
 gythialy
+imageid
 ipch
 isort
+ivnersions
 Khalil
 Kristof
 lastcodeanalysissucceeded
@@ -38,6 +43,7 @@ nupkg
 Onecore
 opendb
 opensdf
+Pathv
 pdbstr
 pingme
 pleaseclose
@@ -49,6 +55,7 @@ pylint
 pyright
 randomascii
 Redistributables
+RSDS
 sethash
 setlocal
 signtool
@@ -58,6 +65,8 @@ sourceindexer
 srcsrv
 stdafx
 symboldir
+symcache
+SYMCACHE
 symsrv
 symstore
 targetver
@@ -72,6 +81,8 @@ vcvars
 vcvarsall
 wcsicmp
 wpaexporter
+wpapk
 wprui
 wptredistmsi
 xcopy
+xperf
