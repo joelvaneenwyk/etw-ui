@@ -42,7 +42,7 @@ jobs:
       SOLUTION_PATH: "${{ matrix.solution }}/${{ matrix.solution }}.sln"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: recursive
